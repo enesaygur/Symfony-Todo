@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Todo{% endblock %}
+
+{% block body %}
+    <h1 class="text-center text-primary">Edit Todo</h1>
+
+    <div class="card shadow p-4">
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+        {{ form_end(form) }}
+    </div>
+
+    <br>
+    <a href="{{ path('todos_list') }}" class="btn btn-secondary">Back to List</a>
+{% endblock %}

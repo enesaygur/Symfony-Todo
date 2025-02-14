@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Todo List{% endblock %}
+
+{% block body %}
+    <h1 class="text-center text-primary">Todo List</h1>
+
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr class="text-center">
+                <th class="text-start">Title</th>
+                <th>Completed</th>
+                <th>Created At</th>
+                <th>Change Status</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for todo in todos %}
+                <tr class="text-center">
+                    <td class="text-start">{{ todo.title }}</td>
+                    <td>
+                        {% if todo.completed %}
+                            <span class="badge bg-success">✅ Completed</span>
+                        {% else %}
+                            <span class="badge bg-warning">❌ Not Completed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ todo.createdAt|date('d-m-Y H:i') }}</td>
+                    <td>
+                        <a href="{{ path('todos_toggle', {id: todo.id}) }}">
+                        {% if todo.completed %}
+                            ❌
+                        {% else %}
+                            ✅
+                        {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('todos_edit', {'id': todo.id}) }}" class="btn btn-sm btn-info">✏ Edit</a>
+                    </td>
+                    <td>
+                        <form action="{{ path('todos_delete', {'id': todo.id}) }}" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('todos_add') }}" class="btn btn-primary">Add New Todo</a>
+{% endblock %}
