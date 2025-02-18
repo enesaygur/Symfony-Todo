@@ -8,8 +8,8 @@
     <table class="table table-striped mt-4">
         <thead>
             <tr class="text-center">
+                <th class="text-start">Id</th>
                 <th class="text-start">Title</th>
-                <th>Completed</th>
                 <th>Created At</th>
                 <th>Change Status</th>
                 <th>Edit</th>
@@ -19,7 +19,11 @@
         <tbody>
             {% for todo in todos %}
                 <tr class="text-center">
+                    <td>
+                        {{todo.id}}
+                    </td>
                     <td class="text-start">{{ todo.title }}</td>
+                    {#
                     <td>
                         {% if todo.completed %}
                             <span class="badge bg-success">✅ Completed</span>
@@ -27,8 +31,9 @@
                             <span class="badge bg-warning">❌ Not Completed</span>
                         {% endif %}
                     </td>
+                    #}
                     <td>{{ todo.createdAt|date('d-m-Y H:i') }}</td>
-                    <td>
+                    {#<td> yorum satırı
                         <a href="{{ path('todos_toggle', {id: todo.id}) }}">
                         {% if todo.completed %}
                             ❌
@@ -36,19 +41,77 @@
                             ✅
                         {% endif %}
                         </a>
+                    </td> #}
+                    <td>
+                        <button class="toggle-status btn btn-sm btn-warning" data-id="{{todo.id}}">
+                            {% if todo.completed%}
+                            ✅ Completed
+                            {% else %}
+                            ❌ Not Completed
+                            {%endif%}
+                        </button>
                     </td>
                     <td>
                         <a href="{{ path('todos_edit', {'id': todo.id}) }}" class="btn btn-sm btn-info">✏ Edit</a>
                     </td>
+                    {#
                     <td>
                         <form action="{{ path('todos_delete', {'id': todo.id}) }}" method="post">
                             <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
                         </form>
                     </td>
+                    #}
+                    <td>
+                        <button class="delete-todo btn btn-sm btn-danger" data-id="{{ todo.id }}">🗑 Delete</button>
+                    </td>                    
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-
     <a href="{{ path('todos_add') }}" class="btn btn-primary">Add New Todo</a>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-status").forEach(button => {
+        button.addEventListener("click", function () {
+            let todoId = this.getAttribute("data-id");
+
+            fetch(`/todos/${todoId}/toggle-ajax`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = data.completed ? "✅ Completed" : "❌ Not Completed";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+});
+
+document.querySelectorAll(".delete-todo").forEach(button => {
+    button.addEventListener("click", function () {
+        let todoId = this.getAttribute("data-id");
+
+        fetch(`/todos/${todoId}/delete-ajax`, {
+            method: "DELETE",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.closest("tr").remove();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+
+</script>
+        
 {% endblock %}

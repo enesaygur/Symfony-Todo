@@ -5,6 +5,7 @@ use App\Entity\Todo;
 use App\Form\TodoType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,7 +16,7 @@ class TodoController extends AbstractController
     #[Route('/todos',name:'todos_list')]
     public function index(EntityManagerInterface $em): Response
     {
-        $todos=$em->getRepository(Todo::class)->findAll();
+        $todos=$em->getRepository(Todo::class)->findBy([],['id'=>'DESC']);
         return $this->render('todo/index.html.twig',['todos'=>$todos]);
     }
 
@@ -98,6 +99,38 @@ class TodoController extends AbstractController
         }
         return $this->render('todo/edit.html.twig', [
             'form'=>$form->createView()
+        ]);
+    }
+
+    #[Route('/todos/{id}/toggle-ajax', name:'todos_toggle_ajax', methods:['POST'])]
+    public function toggleAjax(EntityManagerInterface $em, Todo $todo): JsonResponse
+    {
+        if(!$todo){
+            return new JsonResponse(['success'=>false, 'message'=>'Todo not found'],404);
+        }
+        $todo->setCompleted(!$todo->isCompleted());
+        $em->flush();
+
+        return new JsonResponse([
+            'success'=>true,
+            'completed'=>$todo->isCompleted(),
+            'id'=>$todo->getId()
+        ]);
+    }
+
+    #[Route('/todos/{id}/delete-ajax',name:'todos_delete_ajax',methods:['DELETE'])]
+    public function deleteAjax(EntityManagerInterface $em, Todo $todo): JsonResponse
+    {
+        if(!$todo){
+            return new JsonResponse(['success'=>false,'message'=>'Todo not found'],404);
+        }
+        $id=$todo->getId();
+        $em->remove($todo);
+        $em->flush();
+        
+        return new JsonResponse([
+            'success'=>true,
+            'id'=>$id
         ]);
     }
 }
